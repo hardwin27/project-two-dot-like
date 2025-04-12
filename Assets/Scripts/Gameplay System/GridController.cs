@@ -14,12 +14,14 @@ public class GridController : MonoBehaviour
     public TileController[,] TileControllers;
     public Vector2[,] TilePositions;
 
+    public Action<TileController> OnTileGenerated;
+
     private void Start()
     {
-        GenerateGrid();
+        /*GenerateGrid();*/
     }
 
-    private void GenerateGrid()
+    public void GenerateGrid()
     {
         TileControllers = new TileController[gridSize.x, gridSize.y];
         TilePositions = new Vector2[gridSize.x, gridSize.y];
@@ -49,7 +51,7 @@ public class GridController : MonoBehaviour
         if (tileObject.TryGetComponent(out TileController tileController))
         {
             TileControllers[x, y] = tileController;
-            tileController.TileClicked += TileClickedHandler;
+            tileController.OnTileClick += TileClickedHandler;
 
             tileController.TileCoordinate = new Vector2Int(x, y);
             int colorInd = UnityEngine.Random.Range(1, 5);
@@ -57,6 +59,8 @@ public class GridController : MonoBehaviour
             {
                 tileController.ColorID = (ColorId)colorInd;
             }
+
+            OnTileGenerated?.Invoke(tileController);
         }
     }
 
@@ -92,7 +96,7 @@ public class GridController : MonoBehaviour
     // Debug
     private void TileClickedHandler(TileController tileController)
     {
-        tileController.TileClicked -= TileClickedHandler;
+        tileController.OnTileClick -= TileClickedHandler;
 
         Vector2Int clickedCoord = tileController.TileCoordinate;
         Destroy(tileController.gameObject);

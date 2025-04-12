@@ -4,15 +4,11 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] private GridController gridController;
+    [SerializeField] private ConnectorController connectorController;
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        
+        gridController.GenerateGrid();
     }
 }

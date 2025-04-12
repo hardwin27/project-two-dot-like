@@ -1,18 +1,64 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Sirenix.OdinInspector;
 
 public class ConnectorController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private GridController gridController;
+
+    [SerializeField, ReadOnly] private bool isDragging = false;
+    [SerializeField] private List<TileController> selectedTiles = new List<TileController>();
+
+    [SerializeField] private GameObject lineSegmentPrefab;
+    [SerializeField, ReadOnly] private List<GameObject> activeLines = new List<GameObject>();
+
+
+    private void OnEnable()
     {
-        
+        gridController.OnTileGenerated += HandleTileGenerated;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDisable()
     {
+        gridController.OnTileGenerated -= HandleTileGenerated;
+    }
+
+    private void HandlePointerUp()
+    {
+
+    }
+
+    private void HandleTileGenerated(TileController tileController)
+    {
+        tileController.OnTilePointerDown += HandleTilePointerDown;
+        tileController.OnTilePointerEnter += HandleTilePointerEnter;
+    }
+
+    private void HandleTileRemoved(TileController tileController)
+    {
+        tileController.OnTilePointerDown -= HandleTilePointerDown;
+        tileController.OnTilePointerEnter -= HandleTilePointerEnter;
+    }
+
+    private void HandleTilePointerDown(TileController tileController)
+    {
+        if (isDragging)
+        {
+            return;
+        }
+
+        isDragging = true;
+        selectedTiles.Add(tileController);
+    }
+
+    private void HandleTilePointerEnter(TileController tileController)
+    {
+        if (!isDragging)
+        {
+            return;
+        }
+
         
     }
 }

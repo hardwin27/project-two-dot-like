@@ -5,13 +5,16 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Sirenix.OdinInspector;
 
-public class TileController : MonoBehaviour, IPointerClickHandler
+public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, /*IPointerUpHandler,*/ IPointerEnterHandler
 {
     [SerializeField] private TileVisual tileVisual;
     [SerializeField, ReadOnly] private ColorId colorId;
     [SerializeField, ReadOnly] private Vector2Int tileCoordinate;
 
-    public event Action<TileController> TileClicked;
+    public event Action<TileController> OnTileClick;
+    public event Action<TileController> OnTilePointerEnter;
+    public event Action<TileController> OnTilePointerDown;
+    /*public event Action OnTilePointerUp;*/
 
     public ColorId ColorID 
     { 
@@ -36,7 +39,22 @@ public class TileController : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        TileClicked?.Invoke(this);
+        OnTileClick?.Invoke(this);
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        OnTilePointerEnter?.Invoke(this);
+    }
+
+    /*public void OnPointerUp(PointerEventData eventData)
+    {
+        OnTilePointerUp?.Invoke();
+    }
+*/
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        throw new NotImplementedException();
     }
 
     private void UpdateVisual()
