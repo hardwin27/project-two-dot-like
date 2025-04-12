@@ -7,14 +7,18 @@ using Sirenix.OdinInspector;
 
 public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, /*IPointerUpHandler,*/ IPointerEnterHandler
 {
-    [SerializeField] private TileVisual tileVisual;
-    [SerializeField, ReadOnly] private ColorId colorId;
-    [SerializeField, ReadOnly] private Vector2Int tileCoordinate;
+    private bool isActive;
+
+    [SerializeField] protected TileVisual tileVisual;
+    [SerializeField, ReadOnly] protected ColorId colorId;
+    [SerializeField, ReadOnly] protected Vector2Int tileCoordinate;
 
     public event Action<TileController> OnTileClick;
     public event Action<TileController> OnTilePointerEnter;
     public event Action<TileController> OnTilePointerDown;
     public event Action<TileController> OnTileDestroyed;
+
+    public bool IsActive { get => isActive; }
 
     public ColorId ColorID 
     { 
@@ -42,14 +46,14 @@ public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownH
         tileVisual.OnTileVisualDestroyed -= HandleVisualDestroyed;
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         UpdateVisual();
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    public virtual void OnPointerClick(PointerEventData eventData)
     {
-        OnTileClick?.Invoke(this);
+        return;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -79,12 +83,20 @@ public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownH
     {
         OnTileDestroyed?.Invoke(this);
         
-        // Temporary solution
+        // Temporary solution before pooling
         gameObject.SetActive(false);
         Destroy(gameObject, 1f);
     }
 
-    public virtual void Trigger()
+    public void Trigger()
+    {
+        if (isActive)
+        {
+            Execute();
+        }
+    }
+
+    protected virtual void Execute()
     {
         DestroyTile();
     }

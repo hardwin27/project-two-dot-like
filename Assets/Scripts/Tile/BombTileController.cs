@@ -1,18 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class BombTileController : MonoBehaviour
+public class BombTileController : TileController
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private TileEffectExecutor tileEffectExecutor;
+
+    protected override void Start()
     {
-        
+        base.Start();
+        colorId = ColorId.None;
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void OnPointerClick(PointerEventData eventData)
     {
-        
+        base.OnPointerClick(eventData);
+
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            tileEffectExecutor.DestorySurrounding(tileCoordinate);
+        }
     }
 }

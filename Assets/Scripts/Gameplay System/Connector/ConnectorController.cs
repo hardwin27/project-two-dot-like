@@ -10,21 +10,25 @@ public class ConnectorController : MonoBehaviour
 
     [SerializeField, ReadOnly] private bool isDragging = false;
     private List<TileController> selectedTiles = new List<TileController>();
+    [SerializeField, ReadOnly] private ColorId currentSelectedColor = ColorId.None;
 
     [SerializeField] private RectTransform lineParent;
     [SerializeField] private GameObject lineSegmentPrefab;
     private List<GameObject> activeLines = new List<GameObject>();
     private GameObject previewLine;
 
+    public ColorId CurrentSelectedColor { get => currentSelectedColor; }
 
     private void OnEnable()
     {
         gridController.OnTileGenerated += HandleTileGenerated;
+        gridController.OnTileDestroyed += HandleTileRemoved;
     }
 
     private void OnDisable()
     {
         gridController.OnTileGenerated -= HandleTileGenerated;
+        gridController.OnTileDestroyed -= HandleTileRemoved;
     }
 
     private void Update()
@@ -80,11 +84,12 @@ public class ConnectorController : MonoBehaviour
         {
             foreach (TileController tileController in selectedTiles)
             {
-                gridController.DestroyTile(tileController);
+                tileController.Trigger();
             }
         }
 
         selectedTiles.Clear();
+        currentSelectedColor = ColorId.None;
 
         foreach (var line in activeLines)
         {
@@ -103,6 +108,11 @@ public class ConnectorController : MonoBehaviour
     {
         tileController.OnTilePointerDown += HandleTilePointerDown;
         tileController.OnTilePointerEnter += HandleTilePointerEnter;
+
+        if (tileController.gameObject.TryGetComponent(out INeedConnector connectorComponent))
+        {
+            connectorComponent.Connector = this;
+        }
     }
 
     private void HandleTileRemoved(TileController tileController)
@@ -118,6 +128,13 @@ public class ConnectorController : MonoBehaviour
             return;
         }
 
+        if (tileController.ColorID == ColorId.None || 
+            tileController.ColorID == ColorId.Wild)
+        {
+            return;
+        }
+
+        currentSelectedColor = tileController.ColorID;
         isDragging = true;
         selectedTiles.Add(tileController);
     }
@@ -170,10 +187,7 @@ public class ConnectorController : MonoBehaviour
             return;
         }
 
-        // Add to path
         selectedTiles.Add(tileController);
-
-        // Draw line
         DrawLineBetween(lastTile, tileController);
     }
 }

@@ -1,5 +1,6 @@
 using DG.Tweening;
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridController : MonoBehaviour
@@ -14,7 +15,10 @@ public class GridController : MonoBehaviour
     public TileController[,] TileControllers;
     public Vector2[,] TilePositions;
 
+    public Vector2Int GridSize { get => gridSize; }
+
     public Action<TileController> OnTileGenerated;
+    public Action<TileController> OnTileDestroyed;
 
     private void Start()
     {
@@ -48,13 +52,18 @@ public class GridController : MonoBehaviour
             tileRect.anchoredPosition = TilePositions[x, y];
         }
 
+        if (tileObject.TryGetComponent(out INeedGrid gridNeedComp))
+        {
+            gridNeedComp.Grid = this;
+        }
+
         if (tileObject.TryGetComponent(out TileController tileController))
         {
             TileControllers[x, y] = tileController;
             tileController.OnTileDestroyed += HandleTileDestroyed;
 
             tileController.TileCoordinate = new Vector2Int(x, y);
-            int colorInd = UnityEngine.Random.Range(1, 5);
+            int colorInd = UnityEngine.Random.Range(1, Enum.GetValues(typeof(ColorId)).Length - 1);
             if (Enum.IsDefined(typeof(ColorId), colorInd))
             {
                 tileController.ColorID = (ColorId)colorInd;
@@ -92,25 +101,13 @@ public class GridController : MonoBehaviour
         GenerateTile(tileCoor.x, gridSize.y - 1);
     }
 
-
-    public void DestroyTile(TileController tileController)
-    {
-        /*tileController.OnTileClick -= TileClickedHandler;*/
-
-        tileController.Trigger();
-
-        /*Vector2Int clickedCoord = tileController.TileCoordinate;
-        Destroy(tileController.gameObject);
-        TileControllers[clickedCoord.x, clickedCoord.y] = null;
-
-        CollapseColumn(clickedCoord);*/
-    }
-
     private void HandleTileDestroyed(TileController tileController)
     {
-        tileController.OnTileDestroyed += HandleTileDestroyed;
+        tileController.OnTileDestroyed -= HandleTileDestroyed;
         Vector2Int clickedCoord = tileController.TileCoordinate;
         TileControllers[clickedCoord.x, clickedCoord.y] = null;
+
+        OnTileDestroyed?.Invoke(tileController);
 
         CollapseColumn(clickedCoord);
     }
