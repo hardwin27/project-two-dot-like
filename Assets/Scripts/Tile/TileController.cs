@@ -12,6 +12,8 @@ public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownH
     [SerializeField] protected TileVisual tileVisual;
     [SerializeField, ReadOnly] protected ColorId colorId;
     [SerializeField, ReadOnly] protected Vector2Int tileCoordinate;
+    
+    protected bool preventCollapseOverwrite = false;
 
     public event Action<TileController> OnTileClick;
     public event Action<TileController> OnTilePointerEnter;
@@ -19,6 +21,7 @@ public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownH
     public event Action<TileController> OnTileDestroyed;
 
     public bool IsActive { get => isActive; }
+    public bool PreventCollapseOverwrite { get => preventCollapseOverwrite; }
 
     public ColorId ColorID 
     { 
@@ -48,6 +51,7 @@ public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownH
 
     protected virtual void Start()
     {
+        isActive = true;
         UpdateVisual();
     }
 

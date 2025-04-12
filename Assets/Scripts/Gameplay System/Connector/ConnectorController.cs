@@ -7,6 +7,8 @@ public class ConnectorController : MonoBehaviour
 {
     [SerializeField] private GridController gridController;
     [SerializeField] private int minMatchCount;
+    [SerializeField] private GameObject bombTilePrefab;
+    [SerializeField] private GameObject rainbowTIlePrefab;
 
     [SerializeField, ReadOnly] private bool isDragging = false;
     private List<TileController> selectedTiles = new List<TileController>();
@@ -75,26 +77,52 @@ public class ConnectorController : MonoBehaviour
         lineRect.rotation = Quaternion.Euler(0, 0, angle - 90f);
     }
 
+    private IEnumerator SpawnSpecialTileAfterDelay(float delay, Vector2Int coord, GameObject prefab)
+    {
+        yield return new WaitForSeconds(delay);
+        gridController.GenerateTile(coord.x, coord.y, prefab);
+        gridController.ClearReservedPosition(coord);
+    }
+
 
     private void HandlePointerUp()
     {
         isDragging = false;
 
+        bool shouldSpawnSpecial = selectedTiles.Count >= 6;
+        Vector2Int specialTileCoord = Vector2Int.zero;
+        GameObject specialPrefab = null;
+
+        if (shouldSpawnSpecial)
+        {
+            TileController lastTile = selectedTiles[selectedTiles.Count - 1];
+            specialTileCoord = lastTile.TileCoordinate;
+            specialPrefab = selectedTiles.Count >= 9 ? rainbowTIlePrefab : bombTilePrefab;
+        }
+
         if (selectedTiles.Count >= minMatchCount)
         {
             foreach (TileController tileController in selectedTiles)
             {
+                if (shouldSpawnSpecial)
+                {
+                    gridController.ReserveTilePosition(specialTileCoord);
+                }
+
                 tileController.Trigger();
             }
+        }
+
+        if (shouldSpawnSpecial)
+        {
+            StartCoroutine(SpawnSpecialTileAfterDelay(0.3f, specialTileCoord, specialPrefab));
         }
 
         selectedTiles.Clear();
         currentSelectedColor = ColorId.None;
 
         foreach (var line in activeLines)
-        {
             Destroy(line);
-        }
         activeLines.Clear();
 
         if (previewLine != null)
@@ -103,6 +131,8 @@ public class ConnectorController : MonoBehaviour
             previewLine = null;
         }
     }
+
+
 
     private void HandleTileGenerated(TileController tileController)
     {
@@ -178,16 +208,16 @@ public class ConnectorController : MonoBehaviour
         if (!isDragging || selectedTiles.Contains(tileController)) return;
 
         TileController lastTile = selectedTiles[selectedTiles.Count - 1];
-        if (tileController.ColorID != lastTile.ColorID)
-        {
-            return;
-        } 
-         if (!IsAdjacent(tileController.TileCoordinate, lastTile.TileCoordinate))
+
+        if (!IsAdjacent(tileController.TileCoordinate, lastTile.TileCoordinate))
         {
             return;
         }
 
-        selectedTiles.Add(tileController);
-        DrawLineBetween(lastTile, tileController);
+        if (tileController.ColorID == currentSelectedColor || tileController.ColorID == ColorId.Wild)
+        {
+            selectedTiles.Add(tileController);
+            DrawLineBetween(lastTile, tileController);
+        }
     }
 }

@@ -10,8 +10,10 @@ public class BombTileController : TileController
     protected override void Start()
     {
         base.Start();
-        colorId = ColorId.None;
+        ColorID = ColorId.None;
+        preventCollapseOverwrite = true;
     }
+
 
     public override void OnPointerClick(PointerEventData eventData)
     {
@@ -19,7 +21,13 @@ public class BombTileController : TileController
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            tileEffectExecutor.DestorySurrounding(tileCoordinate);
+            Trigger();
         }
+    }
+
+    protected override void Execute()
+    {
+        tileEffectExecutor.DestorySurrounding(tileCoordinate);
+        DestroyTile();
     }
 }

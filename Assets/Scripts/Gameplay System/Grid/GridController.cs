@@ -1,11 +1,13 @@
 using DG.Tweening;
 using System;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GridController : MonoBehaviour
 {
-    [SerializeField] private GameObject tilePrefab;
+    [SerializeField] private GameObject basicTilePrefab;
     [SerializeField] private RectTransform gridParent;
 
     [SerializeField] private Vector2 startPos = Vector2.zero;
@@ -14,6 +16,8 @@ public class GridController : MonoBehaviour
 
     public TileController[,] TileControllers;
     public Vector2[,] TilePositions;
+
+    private List<Vector2Int> reservedSpawnPositions = new List<Vector2Int>();
 
     public Vector2Int GridSize { get => gridSize; }
 
@@ -39,12 +43,25 @@ public class GridController : MonoBehaviour
                         (y * tileSize.y) + startPos.y
                     );
 
-                GenerateTile(x, y);
+                GenerateTile(x, y, basicTilePrefab);
             }
         }
     }
 
-    private void GenerateTile(int x, int y)
+    public void ReserveTilePosition(Vector2Int coord)
+    {
+        if (!reservedSpawnPositions.Contains(coord))
+            reservedSpawnPositions.Add(coord);
+    }
+
+    public void ClearReservedPosition(Vector2Int coord)
+    {
+        reservedSpawnPositions.Remove(coord);
+    }
+
+
+
+    public void GenerateTile(int x, int y, GameObject tilePrefab)
     {
         GameObject tileObject = Instantiate(tilePrefab, gridParent);
         if (tileObject.TryGetComponent(out RectTransform tileRect))
@@ -79,27 +96,49 @@ public class GridController : MonoBehaviour
         {
             if (TileControllers[tileCoor.x, y] == null)
             {
+                Vector2Int checkCoord = new(tileCoor.x, y);
+                if (reservedSpawnPositions.Contains(checkCoord))
+                {
+                    continue;
+                }
+
                 for (int aboveY = y + 1; aboveY < gridSize.y; aboveY++)
                 {
-                    if (TileControllers[tileCoor.x, aboveY] != null)
+                    var aboveTile = TileControllers[tileCoor.x, aboveY];
+
+                    if (aboveTile != null)
                     {
-                        TileControllers[tileCoor.x, y] = TileControllers[tileCoor.x, aboveY];
-                        TileControllers[tileCoor.x, aboveY] = null;
+                        var belowTile = TileControllers[tileCoor.x, y];
 
-                        TileControllers[tileCoor.x, y].TileCoordinate = new Vector2Int(tileCoor.x, y);
-
-                        if (TileControllers[tileCoor.x, y].TryGetComponent(out RectTransform tileRect))
+                        if (belowTile == null || !belowTile.PreventCollapseOverwrite)
                         {
-                            tileRect.DOAnchorPos(TilePositions[tileCoor.x, y], 0.25f).SetEase(Ease.OutCubic);
+                            TileControllers[tileCoor.x, y] = aboveTile;
+                            TileControllers[tileCoor.x, aboveY] = null;
+
+                            aboveTile.TileCoordinate = new Vector2Int(tileCoor.x, y);
+
+                            if (aboveTile.TryGetComponent(out RectTransform tileRect))
+                            {
+                                tileRect.DOAnchorPos(TilePositions[tileCoor.x, y], 0.25f).SetEase(Ease.OutCubic);
+                            }
+
+                            break;
                         }
-                        break;
                     }
                 }
             }
         }
 
-        GenerateTile(tileCoor.x, gridSize.y - 1);
+        Vector2Int topCoord = new(tileCoor.x, gridSize.y - 1);
+        if (!reservedSpawnPositions.Contains(topCoord) &&
+            (TileControllers[tileCoor.x, topCoord.y] == null ||
+             !TileControllers[tileCoor.x, topCoord.y].PreventCollapseOverwrite))
+        {
+            GenerateTile(tileCoor.x, topCoord.y, basicTilePrefab);
+        }
+
     }
+
 
     private void HandleTileDestroyed(TileController tileController)
     {

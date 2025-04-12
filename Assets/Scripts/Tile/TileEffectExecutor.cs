@@ -13,6 +13,11 @@ public class TileEffectExecutor : MonoBehaviour, INeedGrid, INeedConnector
         {
             for (int dy = -1; dy <= 1; dy++)
             {
+                if (dx == 0 && dy == 0)
+                {
+                    continue;
+                }
+
                 int targetX = tileCoord.x + dx;
                 int targetY = tileCoord.y + dy;
 

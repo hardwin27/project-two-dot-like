@@ -236,7 +236,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridController: {fileID: 1174867904}
   minMatchCount: 3
+  bombTilePrefab: {fileID: 3095480176132987546, guid: 4576da4b042983c439fcbe39aa56aafe, type: 3}
+  rainbowTIlePrefab: {fileID: 3095480176132987546, guid: 5bc5d550b0feb7d49baa9dda0b6514d1, type: 3}
   isDragging: 0
+  currentSelectedColor: -1
   lineParent: {fileID: 1872109367}
   lineSegmentPrefab: {fileID: 7804149512093148070, guid: 47ba6ab79aa42a040b9f420b8eb84f37, type: 3}
 --- !u!1 &379654043
@@ -627,7 +630,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bfa1f43cdd364447bf9d7b8a1560ec5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilePrefab: {fileID: 3095480176132987546, guid: f759184f32bd05b439eddc95f5b9d3aa, type: 3}
+  basicTilePrefab: {fileID: 3095480176132987546, guid: f759184f32bd05b439eddc95f5b9d3aa, type: 3}
   gridParent: {fileID: 1175614661}
   startPos: {x: -300, y: -300}
   tileSize: {x: 100, y: 100}

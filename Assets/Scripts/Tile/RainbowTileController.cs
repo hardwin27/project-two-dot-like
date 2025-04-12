@@ -9,7 +9,7 @@ public class RainbowTileController : TileController
     protected override void Start()
     {
         base.Start();
-        colorId = ColorId.Wild;
+        ColorID = ColorId.Wild;
     }
 
     protected override void Execute()
