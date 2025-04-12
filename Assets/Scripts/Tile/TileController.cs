@@ -54,7 +54,7 @@ public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownH
 */
     public void OnPointerDown(PointerEventData eventData)
     {
-        throw new NotImplementedException();
+        OnTilePointerDown?.Invoke(this);
     }
 
     private void UpdateVisual()
