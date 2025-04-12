@@ -14,7 +14,7 @@ public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownH
     public event Action<TileController> OnTileClick;
     public event Action<TileController> OnTilePointerEnter;
     public event Action<TileController> OnTilePointerDown;
-    /*public event Action OnTilePointerUp;*/
+    public event Action<TileController> OnTileDestroyed;
 
     public ColorId ColorID 
     { 
@@ -32,6 +32,16 @@ public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownH
         set => tileCoordinate = value;
     }
 
+    protected void OnEnable()
+    {
+        tileVisual.OnTileVisualDestroyed += HandleVisualDestroyed;
+    }
+
+    protected void OnDisable()
+    {
+        tileVisual.OnTileVisualDestroyed -= HandleVisualDestroyed;
+    }
+
     private void Start()
     {
         UpdateVisual();
@@ -47,18 +57,32 @@ public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownH
         OnTilePointerEnter?.Invoke(this);
     }
 
-    /*public void OnPointerUp(PointerEventData eventData)
-    {
-        OnTilePointerUp?.Invoke();
-    }
-*/
     public void OnPointerDown(PointerEventData eventData)
     {
         OnTilePointerDown?.Invoke(this);
     }
 
-    private void UpdateVisual()
+    protected void UpdateVisual()
     {
         tileVisual.SetVisualColor(colorId);
+    }
+    
+    protected void DestroyTile()
+    {
+        tileVisual.PlayDestroyVisual();
+    }
+
+    protected virtual void HandleVisualDestroyed()
+    {
+        OnTileDestroyed?.Invoke(this);
+        
+        // Temporary solution
+        gameObject.SetActive(false);
+        Destroy(gameObject, 1f);
+    }
+
+    public virtual void Trigger()
+    {
+        DestroyTile();
     }
 }
