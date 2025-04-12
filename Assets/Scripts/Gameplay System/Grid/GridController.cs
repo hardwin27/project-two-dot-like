@@ -1,9 +1,7 @@
 using DG.Tweening;
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GridController : MonoBehaviour
 {
