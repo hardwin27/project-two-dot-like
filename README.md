@@ -1,4 +1,4 @@
-project-two-dot-like
+## project-two-dot-like
 
 ## Overview
 - `TileController` – Base class for all tiles; handles color, position, trigger flow, and destruction lifecycle.
