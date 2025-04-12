@@ -59,7 +59,10 @@ public class TileController : MonoBehaviour, IPointerClickHandler, IPointerDownH
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        OnTilePointerDown?.Invoke(this);
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            OnTilePointerDown?.Invoke(this);
+        }
     }
 
     protected void UpdateVisual()

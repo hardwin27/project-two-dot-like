@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7804149512093148069}
   - component: {fileID: 7804149512093148068}
   m_Layer: 5
-  m_Name: LineSegment
+  m_Name: Line Segment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

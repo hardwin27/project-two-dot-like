@@ -15,7 +15,14 @@ public class TileVisual : MonoBehaviour
     public void SetVisualColor(ColorId colorId)
     {
         int colorInd = (int)colorId;
-        tintedImage.color = colorLibrary[colorInd];
+        if (colorInd <= 0)
+        {
+            tintedImage.color = Color.white;
+        }
+        else
+        {
+            tintedImage.color = colorLibrary[colorInd - 1];
+        }
     }
 
     public void PlayDestroyVisual()
